@@ -3,77 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Golf Shot Tracker</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>Short Game Test</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
       margin: 0;
-      padding: 20px;
-      background: #f2f2f2;
+      padding: 0;
+      background: #f8f9fa;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 420px;
+      padding: 50px 15px 40px;
+      text-align: center
     }
 
     h1 {
-      font-size: 2.5rem;
-      margin-bottom: 40px;
+      font-size: clamp(22px, 5vw, 28px);
+      margin-bottom: 10px;
+      color: #333;
     }
 
-    .section {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+    p {
+      font-size: clamp(14px, 4vw, 18px);
+      margin-bottom: 25px;
+      color: #666;
       align-items: center;
     }
 
-    .btn {
-      width: 80%;
-      max-width: 300px;
-      padding: 18px;
-      font-size: 1.4rem;
-      color: #fff;
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .menu a {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      border-radius: 12px;
       background-color: #007bff;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
+      color: white;
+      font-size: clamp(16px, 4.5vw, 20px);
       text-decoration: none;
-      display: inline-block;
-      transition: background-color 0.2s ease;
+      transition: background 0.3s;
     }
 
-    .btn:hover {
+    .menu a:hover {
       background-color: #0056b3;
-    }
-
-    .btn-secondary {
-      background-color: #6c757d;
-    }
-
-    .btn-secondary:hover {
-      background-color: #545b62;
-    }
-
-    /* Smaller phones */
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 2rem;
-        margin-bottom: 30px;
-      }
-
-      .btn {
-        font-size: 1.6rem;
-        padding: 20px;
-      }
     }
   </style>
 </head>
 <body>
-  <h1>Golf Shot Tracker</h1>
-  <div class="section">
-    <a href="{{ url_for('new_round') }}" class="btn">Start New Round</a>
-    <a href="{{ url_for('stats') }}" class="btn btn-secondary">View Stats</a>
+  <div class="container">
+    <h1>⛳ Short Game Test</h1>
+    <p>Track your shots and improve your short game.</p>
+
+    <div class="menu">
+      <a href="{{ url_for('new_round') }}">🎯 Start New Round</a>
+      <a href="{{ url_for('stats') }}">📊 View Stats</a>
+    </div>
   </div>
 </body>
 </html>
-
-
