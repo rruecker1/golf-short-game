@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golf Stats</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2, h3 {
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+            table-layout: fixed;
+            font-size: 10px
+        }
+
+        th, td {
+            border: 1px solid #007bff;
+            padding: 2px;
+            text-align: center;
+            word-break: break-word;
+            width: 20%
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+        }
+
+        td {
+            background-color: #e9f2ff;
+            font-size: 15px;
+        }
+
+        td.category {
+            background-color: #cce0ff;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 480px) {
+            th, td {
+                padding: 8px;
+                font-size: 11px;
+            }
+            h2, h3 {
+                font-size: clamp(18px, 5vw, 24px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        {% if not has_data %}
+            <p>No shot data available.</p>
+        {% else %}
+            <h3>Overall Stats</h3>
+            <table>
+                <tr>
+                    <th>Total Shots</th>
+                    <th>Avg Proximity (ft)</th>
+                    <th>Up & Down %</th>
+                    <th>Holed %</th>
+                </tr>
+                <tr>
+                    <td>{{ total_shots }}</td>
+                    <td>{{ avg_prox }}</td>
+                    <td>{{ updown_pct }}%</td>
+                    <td>{{ holed_pct }}%</td>
+                </tr>
+            </table>
+
+            <h3>Stats by Shot Category</h3>
+            <table>
+                <tr>
+                    <th>Shot</th>
+                    <th>Avg Proximity (ft)</th>
+                    <th>Up & Down %</th>
+                    <th>Holed %</th>
+                    <th>Miss Location</th>
+                </tr>
+                {% for category, pins in shot_stats.items() %}
+                    <tr>
+                        <td class="category" colspan="5">{{ category }}</td>
+                    </tr>
+                    {% for pin, stats in pins.items() %}
+                    <tr>
+                        <td>{{ pin }}</td>
+                        <td>{{ stats.avg_prox }}</td>
+                        <td>{{ stats.updown_pct }}%</td>
+                        <td>{{ stats.holed_pct }}%</td>
+                        <td>{{ stats.most_common_direction }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <a href="{{ url_for('index') }}">🏠 Back to Home</a>
+    </div>
+</body>
+</html>
