@@ -8,8 +8,6 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 HISTORY_FILE = "round_history.csv"
-def history():
-    return send_file("round_history.csv", as_attachment=False)
 
 # Ensure history file exists
 if not os.path.exists(HISTORY_FILE):
@@ -21,6 +19,12 @@ def load_history():
     if not os.path.exists(HISTORY_FILE):
         return pd.DataFrame()
     return pd.read_csv(HISTORY_FILE)
+
+from flask import send_file
+
+@app.route("/history")
+def history():
+    return send_file("round_history.csv", as_attachment=False)
 
 @app.route("/")
 def index():
