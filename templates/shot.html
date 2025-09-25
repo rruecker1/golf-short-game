@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Short Game Test - Shot {{ n }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        button {
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+            min-width: 80px;
+            padding: 10px 5%;
+            font-size: 16px;
+        }
+
+        .selected {
+            background-color: #28a745 !important;
+        }
+
+        .compass-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, auto);
+            gap: 1px;
+            justify-items: center;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .compass-grid button {
+            width: 70%;
+            font-size: 1.5em;
+            height: 60px;
+            background-color: #007bff;
+        }
+
+        .compass-grid button:hover {
+            background-color: #0056b3;
+        }
+
+        .center-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            background-color: #28a745;
+        }
+
+        .option-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1px;
+            margin-bottom: 1px;
+            justify-content: center;
+        }
+
+        .option-buttons button {
+            background-color: #007bff;
+        }
+
+        .option-buttons button:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-save {
+            background-color: #007bff;
+            font-size: 18px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-save:hover {
+            background-color: #0056b3;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 95%;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .shot-nav {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .shot-link {
+            display: inline-block;
+            margin: 3px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            background-color: #ccc;
+            color: black;
+            font-weight: bold;
+        }
+        .shot-link.saved {
+            background-color: #28a745; /* green if saved */
+            color: white;
+        }
+        .shot-link.current {
+            border: 2px solid #000; /* highlight current shot */
+        }
+
+        @media (max-width: 400px) {
+            .compass-grid button { font-size: 1.2em; height: 40px; }
+            .option-buttons button { font-size: 14px; padding: 10px; }
+            .btn-save { font-size: 16px; padding: 10px 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Shot {{ n }} of 18</h2>
+        <h3>{{ prompt }}</h3>
+
+        <form method="POST" action="{{ url_for('save_shot', n=n) }}">
+            <!-- Hidden inputs -->
+            <input type="hidden" name="direction" id="direction-input" value="{{ form_data.get('direction','') }}">
+            <input type="hidden" name="proximity" id="proximity-input" value="{{ form_data.get('proximity','') }}">
+            <input type="hidden" name="strokes" id="strokes-input" value="{{ form_data.get('strokes','') }}">
+            
+            <!-- Direction buttons -->
+            <h3>🎯 Direction</h3>
+            <div class="compass-grid">
+                <button type="button" class="{% if form_data.get('direction','')=='long-left' %}selected{% endif %}" 
+                        onclick="selectOption('direction','long-left',this)">↖</button>
+                <button type="button" class="{% if form_data.get('direction','')=='long' %}selected{% endif %}" 
+                        onclick="selectOption('direction','long',this)">↑</button>
+                <button type="button" class="{% if form_data.get('direction','')=='long-right' %}selected{% endif %}" 
+                        onclick="selectOption('direction','long-right',this)">↗</button>
+
+                <button type="button" class="{% if form_data.get('direction','')=='left' %}selected{% endif %}" 
+                        onclick="selectOption('direction','left',this)">←</button>
+                <button type="button" class="center-btn {% if form_data.get('direction','')=='holed' %}selected{% endif %}" 
+                        onclick="selectOption('direction','holed',this)">⛳</button>
+                <button type="button" class="{% if form_data.get('direction','')=='right' %}selected{% endif %}" 
+                        onclick="selectOption('direction','right',this)">→</button>
+
+                <button type="button" class="{% if form_data.get('direction','')=='short-left' %}selected{% endif %}" 
+                        onclick="selectOption('direction','short-left',this)">↙</button>
+                <button type="button" class="{% if form_data.get('direction','')=='short' %}selected{% endif %}" 
+                        onclick="selectOption('direction','short',this)">↓</button>
+                <button type="button" class="{% if form_data.get('direction','')=='short-right' %}selected{% endif %}" 
+                        onclick="selectOption('direction','short-right',this)">↘</button>
+            </div>
+            
+            <!-- Proximity buttons -->
+            <h3>📏 Proximity to Hole (feet)</h3>
+            <div class="option-buttons">
+                {% for option in ["Made","0-3","3-6","6-9","9-12","12-15",">15"] %}
+                <button type="button" class="{% if form_data.get('proximity','')==option %}selected{% endif %}" 
+                        onclick="selectOption('proximity','{{ option }}',this)">{{ option }}</button>
+                {% endfor %}
+            </div>
+
+            <!-- Strokes buttons -->
+            <h3>📝 Strokes</h3>
+            <div class="option-buttons">
+                {% for option in ["1","2","3",">3"] %}
+                <button type="button" class="{% if form_data.get('strokes','')==option %}selected{% endif %}" 
+                        onclick="selectOption('strokes','{{ option }}',this)">{{ option }}</button>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn-save">💾 Save Shot</button>
+
+            <div class="shot-nav">
+                <h4>Jump to Shot:</h4>
+                {% for link in shot_links %}
+                    <a href="{{ url_for('shot', n=link.n) }}" 
+                       class="shot-link {% if link.saved %}saved{% endif %} {% if link.n == n %}current{% endif %}">
+                        {{ link.n }}
+                    </a>
+                {% endfor %}
+            </div>
+
+            <h4>Next Shot: {{ next_prompt }}</h4>
+        </form>
+    </div>
+
+    <script>
+        function selectOption(field, value, btn) {
+            document.getElementById(field + "-input").value = value;
+            const group = btn.parentElement.querySelectorAll("button");
+            group.forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+        }
+    </script>
+</body>
+</html>
