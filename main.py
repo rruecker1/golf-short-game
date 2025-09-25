@@ -1,131 +1,207 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from collections import Counter
-import csv
-import os
+import os, csv, random
 from datetime import datetime
+import pandas as pd
 
 app = Flask(__name__)
+app.secret_key = "supersecretkey"
 
-CSV_FILE = "golf_data.csv"
-current_round = {}
+HISTORY_FILE = "round_history.csv"
 
-# Ensure CSV exists with correct headers
-if not os.path.exists(CSV_FILE):
-    with open(CSV_FILE, mode="w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow([
-            "date", "course", "tees",
-            "club", "launch_direction", "shot_shape",
-            "strike_quality", "mental_commitment",
-            "direction", "distance"
-        ])
+# Ensure history file exists
+if not os.path.exists(HISTORY_FILE):
+    with open(HISTORY_FILE, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["Round", "Timestamp", "Shot", "Prompt", "Proximity", "Direction", "Strokes"])
+        writer.writeheader()
 
-# ---------------- ROUTES ----------------
+def load_history():
+    if not os.path.exists(HISTORY_FILE):
+        return pd.DataFrame()
+    return pd.read_csv(HISTORY_FILE)
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
-@app.route("/new_round", methods=["GET", "POST"])
+@app.route("/new_round")
 def new_round():
-    global current_round
-    if request.method == "POST":
-        course = request.form["course"]
-        tees = request.form["tees"]
-        current_round = {
-            "date": datetime.now().strftime("%Y-%m-%d"),
-            "course": course,
-            "tees": tees
-        }
-        return redirect(url_for("shots"))
-    return render_template("new_round.html")
+    categories = ["Bunker", "Short Fairway Chip", "Medium Fairway Chip",
+                  "Long Fairway Chip", "Short Rough Chip", "Medium Rough Chip"]
+    pins = ["Short Pin", "Middle Pin", "Long Pin"]
+    prompts = [f"{c} - {p}" for c in categories for p in pins]  # 18 shots
+    random.shuffle(prompts)
+    session["prompts"] = prompts
+    session["round_id"] = datetime.now().strftime("%Y%m%d%H%M%S")
+    return redirect(url_for("shot", n=1))
 
-@app.route("/shots", methods=["GET", "POST"])
-def shots():
-    global current_round
-    if not current_round:
-        return redirect(url_for("new_round"))
+@app.route("/shot/<int:n>")
+def shot(n):
+    prompts = session.get("prompts")
+    if not prompts:
+        flash("No active round. Start a new round.")
+        return redirect(url_for("index"))
 
-    if request.method == "POST":
-        club = request.form.get("club", "")
-        launch_dir = request.form.get("launch_direction", "")
-        shot_shape = request.form.get("shot_shape", "")
-        impact_location = request.form.get("impact_location", "")
-        strike_quality = request.form.get("strike_quality", "")
-        mental_commitment = request.form.get("mental_commitment", "")
-        direction = request.form.get("direction", "")
-        distance = request.form.get("distance", "")
+    if n > len(prompts):
+        return redirect(url_for("stats"))
 
-        # Save to CSV
-        with open(CSV_FILE, mode="a", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                current_round["date"], current_round["course"], current_round["tees"],
-                club, launch_dir, shot_shape, strike_quality,
-                mental_commitment, direction, distance
-            ])
+    next_prompt = prompts[n] if n < len(prompts) else None
 
-        return redirect(url_for("shots"))
+    # Load saved shot data
+    df = load_history()
+    form_data = {}
 
-    return render_template("shots.html")
+    if not df.empty:
+        # Ensure correct types
+        df["Shot"] = df["Shot"].astype(int)
+        df["Round"] = df["Round"].astype(str)
 
-@app.route("/exit_round", methods=["POST"])
-def exit_round():
-    global current_round
-    current_round = {}
-    return redirect(url_for("index"))
+        match = df[(df["Round"] == str(session["round_id"])) & (df["Shot"] == n)]
+        if not match.empty:
+            form_data = {
+                "direction": str(match.iloc[0]["Direction"]),
+                "proximity": str(match.iloc[0]["Proximity"]),
+                "strokes": str(match.iloc[0]["Strokes"])
+            }
+
+    # Build navigator with saved status
+    shot_links = [{"n": i+1, "saved": False} for i in range(len(prompts))]
+    if not df.empty:
+        saved_shots = df[df["Round"] == str(session["round_id"])]["Shot"].astype(int).tolist()
+        for s in shot_links:
+            if s["n"] in saved_shots:
+                s["saved"] = True
+
+    return render_template(
+        "shot.html",
+        n=n,
+        prompt=prompts[n-1],
+        form_data=form_data,
+        next_prompt=next_prompt,
+        shot_links=shot_links
+    )
+
+
+@app.route("/save_shot/<int:n>", methods=["POST"])
+def save_shot(n):
+    direction = request.form.get("direction", "").strip()
+    prox = request.form.get("proximity", "").strip()
+    strokes = request.form.get("strokes", "").strip()
+
+    errors = []
+    if not direction:
+        errors.append("Please select a direction.")
+    if not prox:
+        errors.append("Please select a proximity option.")
+    if not strokes:
+        errors.append("Please select strokes.")
+
+    if errors:
+        for e in errors:
+            flash(e)
+        return redirect(url_for("shot", n=n))
+
+    # Load current history
+    df = load_history()
+
+    # Ensure correct types
+    if not df.empty:
+        df["Shot"] = df["Shot"].astype(int)
+        df["Round"] = df["Round"].astype(str)
+
+    # New row to insert
+    row = {
+        "Round": str(session["round_id"]),
+        "Timestamp": datetime.now().isoformat(timespec="seconds"),
+        "Shot": n,
+        "Prompt": session["prompts"][n - 1],
+        "Proximity": prox,
+        "Direction": direction,
+        "Strokes": strokes,
+    }
+
+    # Remove any existing record for this Round + Shot
+    if not df.empty:
+        df = df[~((df["Round"] == row["Round"]) & (df["Shot"] == n))]
+
+    # Append the new row
+    df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+
+    # Save back to CSV (overwrite the file)
+    df.to_csv(HISTORY_FILE, index=False)
+
+    if n >= len(session["prompts"]):
+        return redirect(url_for("stats"))
+    return redirect(url_for("shot", n=n + 1))
+
 
 @app.route("/stats")
 def stats():
-    if not os.path.exists(CSV_FILE):
-        return render_template("stats.html", stats={})
+    df = load_history()
+    if df.empty:
+        return render_template("stats.html", has_data=False)
 
-    with open(CSV_FILE, mode="r") as f:
-        reader = csv.DictReader(f)
-        data = list(reader)
+    # Map proximity safely
+    prox_map = {"Made": 0, "0-3": 1.5, "3-6": 4.5, "6-9": 7.5, "9-12": 10.5, "12-15": 13.5, ">15": 18}
+    df["Proximity_num"] = df["Proximity"].map(lambda x: prox_map.get(x, 0))
 
-    # Define club groupings
-    groupings = {
-        "Driver": ["Dr"],
-        "Fairway Woods": ["3w", "5w"],
-        "Long Irons": ["4i", "5i"],
-        "Mid Irons": ["6i", "7i", "8i"],
-        "Short Irons": ["9i","PW"],
-        "Wedges": ["50°", "54°", "58°"],
-        "All Clubs": []  # special case: include all
-    }
+    # Map strokes safely
+    strokes_map = {"1": 1, "2": 2, "3": 3, ">3": 4}
+    df["Strokes_num"] = df["Strokes"].astype(str).map(lambda x: strokes_map.get(x, 4))
 
-    categories = ['launch_direction', 'shot_shape', 'strike_quality',
-                  'mental_commitment', 'direction', 'distance']
+    # Split Prompt into Category and Pin
+    df["Category"] = df["Prompt"].apply(lambda x: x.split(" - ")[0])
+    df["Pin"] = df["Prompt"].apply(lambda x: x.split(" - ")[1])
 
-    stats_by_group = {}
+    # Overall stats
+    total_shots = len(df)
+    avg_prox = round(df["Proximity_num"].mean(), 2)
+    updown_pct = round((df["Strokes_num"] <= 2).sum() / total_shots * 100, 1)
+    holed_pct = round((df["Strokes_num"] == 1).sum() / total_shots * 100, 1)
 
-    for group_name, clubs in groupings.items():
-        if group_name == "All Clubs":
-            rows = data
-        else:
-            rows = [row for row in data if row['club'] in clubs]
+    # Hierarchical stats: Category -> Pin
+    shot_stats = {}
+    for cat, group in df.groupby("Category"):
+        shot_stats[cat] = {}
+        for pin, pin_group in group.groupby("Pin"):
+            avg_prox_pin = round(pin_group["Proximity_num"].mean(), 2)
+            total_pin = len(pin_group)
+            updown = round((pin_group["Strokes_num"] <= 2).sum() / total_pin * 100, 1)
+            holed = round((pin_group["Strokes_num"] == 1).sum() / total_pin * 100, 1)
 
-        n = len(rows)
-        if n == 0:
-            stats_by_group[group_name] = {cat: ("N/A", 0) for cat in categories}
-            continue
-
-        stats_by_group[group_name] = {}
-        for cat in categories:
-            counts = Counter(row[cat] for row in rows if row[cat])
-            most_common = counts.most_common(1)
-            if most_common:
-                value, count = most_common[0]
-                stats_by_group[group_name][cat] = (value, round(count / n * 100, 1))
+            # Compute most common directions
+            direction_counts = Counter()
+            for d in pin_group["Direction"]:
+                if "long" in d: direction_counts["long"] += 1
+                if "short" in d: direction_counts["short"] += 1
+                if "left" in d: direction_counts["left"] += 1
+                if "right" in d: direction_counts["right"] += 1
+        
+            if direction_counts:
+                max_count = max(direction_counts.values())
+                most_common_dir = [k for k, v in direction_counts.items() if v == max_count]
+                most_common_dir_str = ", ".join(most_common_dir)
             else:
-                stats_by_group[group_name][cat] = ("N/A", 0)
-
-    return render_template("stats.html", stats=stats_by_group)
-
-
-# ---------------- RUN ----------------
+                most_common_dir_str = ""
+        
+            shot_stats[cat][pin] = {
+                "avg_prox": avg_prox_pin,
+                "updown_pct": updown,
+                "holed_pct": holed,
+                "most_common_direction": most_common_dir_str
+            }
+    return render_template(
+        "stats.html",
+        has_data=True,
+        total_shots=total_shots,
+        avg_prox=avg_prox,
+        updown_pct=updown_pct,
+        holed_pct=holed_pct,
+        shot_stats=shot_stats
+    )
 
 if __name__ == "__main__":
-    # Use port 81 for Replit
-    app.run(host="0.0.0.0", port=81, debug=True)
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
+
