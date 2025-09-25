@@ -1,0 +1,71 @@
+Round,Timestamp,Shot,Prompt,Proximity,Direction,Strokes
+20250908232851,2025-09-08T23:30:18,1,Short Fairway Chip - Long Pin,12-15,long,3
+20250908232851,2025-09-08T23:31:09,2,Short Rough Chip - Middle Pin,0-3,right,2
+20250908232851,2025-09-08T23:32:30,3,Short Fairway Chip - Middle Pin,3-6,long-right,2
+20250908232851,2025-09-08T23:33:23,4,Short Fairway Chip - Short Pin,0-3,right,2
+20250908232851,2025-09-08T23:35:34,5,Bunker - Short Pin,6-9,short-right,2
+20250908232851,2025-09-08T23:37:31,6,Medium Fairway Chip - Middle Pin,12-15,long-left,3
+20250908232851,2025-09-08T23:40:09,7,Bunker - Middle Pin,12-15,long,3
+20250908232851,2025-09-08T23:41:35,8,Medium Fairway Chip - Short Pin,0-3,left,2
+20250908232851,2025-09-08T23:43:23,9,Medium Fairway Chip - Long Pin,12-15,long,3
+20250908232851,2025-09-08T23:45:33,10,Medium Rough Chip - Long Pin,>15,long,2
+20250908232851,2025-09-08T23:46:46,11,Short Rough Chip - Short Pin,0-3,long-right,2
+20250908232851,2025-09-08T23:48:29,12,Long Fairway Chip - Middle Pin,>15,long,3
+20250908232851,2025-09-08T23:49:43,13,Long Fairway Chip - Long Pin,>15,long-left,3
+20250908232851,2025-09-08T23:52:47,14,Medium Rough Chip - Middle Pin,6-9,short,3
+20250908232851,2025-09-08T23:54:17,15,Short Rough Chip - Long Pin,6-9,short,2
+20250908232851,2025-09-08T23:55:48,16,Medium Rough Chip - Short Pin,6-9,short,3
+20250908232851,2025-09-08T23:57:54,17,Bunker - Long Pin,>15,short,3
+20250908232851,2025-09-09T00:00:09,18,Long Fairway Chip - Short Pin,6-9,long,3
+20250909154919,2025-09-09T15:51:11,1,Medium Fairway Chip - Short Pin,0-3,right,2
+20250909154919,2025-09-09T15:53:45,2,Bunker - Long Pin,>15,right,3
+20250909154919,2025-09-09T15:55:49,3,Medium Fairway Chip - Middle Pin,>15,long,3
+20250909154919,2025-09-09T15:57:56,4,Long Fairway Chip - Middle Pin,12-15,left,3
+20250909154919,2025-09-09T15:58:51,5,Short Fairway Chip - Middle Pin,0-3,right,2
+20250909154919,2025-09-09T16:01:29,6,Bunker - Middle Pin,6-9,left,2
+20250909154919,2025-09-09T16:02:14,7,Short Rough Chip - Middle Pin,0-3,right,2
+20250909154919,2025-09-09T16:03:44,8,Short Fairway Chip - Long Pin,3-6,long,3
+20250909154919,2025-09-09T16:05:41,9,Bunker - Short Pin,9-12,short,2
+20250909154919,2025-09-09T16:08:06,10,Long Fairway Chip - Long Pin,>15,long,3
+20250909154919,2025-09-09T16:10:25,11,Medium Fairway Chip - Long Pin,12-15,short-right,2
+20250909154919,2025-09-09T16:12:57,12,Long Fairway Chip - Short Pin,6-9,short-right,3
+20250909154919,2025-09-09T16:14:35,13,Medium Rough Chip - Short Pin,0-3,right,2
+20250909154919,2025-09-09T16:16:34,14,Short Rough Chip - Short Pin,3-6,long,3
+20250909154919,2025-09-09T16:18:26,15,Medium Rough Chip - Middle Pin,3-6,long,2
+20250909154919,2025-09-09T16:20:11,16,Medium Rough Chip - Long Pin,3-6,right,2
+20250909154919,2025-09-09T16:22:08,17,Short Rough Chip - Long Pin,>15,long,3
+20250909154919,2025-09-09T16:23:39,18,Short Fairway Chip - Short Pin,Made,holed,1
+20250916160843,2025-09-16T16:12:03,1,Long Fairway Chip - Long Pin,>15,long,3
+20250916160843,2025-09-16T16:13:41,2,Short Rough Chip - Long Pin,0-3,right,3
+20250916160843,2025-09-16T16:15:57,3,Medium Rough Chip - Long Pin,3-6,left,2
+20250916160843,2025-09-16T16:16:51,4,Short Rough Chip - Middle Pin,0-3,left,2
+20250916160843,2025-09-16T16:20:29,5,Short Fairway Chip - Middle Pin,0-3,left,2
+20250916160843,2025-09-16T16:23:07,6,Bunker - Long Pin,>15,short,3
+20250916160843,2025-09-16T16:25:09,7,Medium Rough Chip - Short Pin,3-6,long,3
+20250916160843,2025-09-16T16:27:24,8,Long Fairway Chip - Middle Pin,3-6,short-right,2
+20250916160843,2025-09-16T16:30:37,9,Medium Fairway Chip - Middle Pin,6-9,long,3
+20250916160843,2025-09-16T16:35:02,10,Short Fairway Chip - Long Pin,>15,long,3
+20250916160843,2025-09-16T16:37:36,11,Medium Rough Chip - Middle Pin,12-15,short,2
+20250916160843,2025-09-16T16:38:55,12,Short Fairway Chip - Short Pin,0-3,left,2
+20250916160843,2025-09-16T16:41:56,13,Long Fairway Chip - Short Pin,9-12,long,3
+20250916160843,2025-09-16T16:44:21,14,Medium Fairway Chip - Short Pin,3-6,short,2
+20250916160843,2025-09-16T16:46:24,15,Medium Fairway Chip - Long Pin,0-3,short,2
+20250916160843,2025-09-16T16:47:37,16,Bunker - Middle Pin,0-3,right,2
+20250916160843,2025-09-16T16:48:52,17,Short Rough Chip - Short Pin,3-6,long,3
+20250916160843,2025-09-16T16:51:06,18,Bunker - Short Pin,>15,long,3
+20250922193832,2025-09-22T19:39:27,1,Short Rough Chip - Short Pin,3-6,short,3
+20250922193832,2025-09-22T19:39:31,2,Short Fairway Chip - Middle Pin,0-3,short,2
+20250922193832,2025-09-22T19:41:06,4,Medium Fairway Chip - Short Pin,0-3,short,2
+20250922193832,2025-09-22T19:43:08,5,Long Fairway Chip - Middle Pin,>15,short,3
+20250922193832,2025-09-22T19:45:02,7,Short Rough Chip - Long Pin,0-3,short,2
+20250922193832,2025-09-22T19:47:16,8,Long Fairway Chip - Short Pin,3-6,long-right,3
+20250922193832,2025-09-22T19:52:27,9,Long Fairway Chip - Long Pin,9-12,short-right,3
+20250922193832,2025-09-22T19:52:33,10,Short Fairway Chip - Long Pin,9-12,short-right,2
+20250922193832,2025-09-22T19:54:10,11,Short Rough Chip - Middle Pin,12-15,long,3
+20250922193832,2025-09-22T19:56:52,12,Medium Rough Chip - Long Pin,>15,short-right,3
+20250922193832,2025-09-22T19:58:48,13,Bunker - Short Pin,12-15,long-right,3
+20250922193832,2025-09-22T20:01:54,14,Medium Fairway Chip - Middle Pin,>15,right,3
+20250922193832,2025-09-22T20:02:50,15,Short Fairway Chip - Short Pin,0-3,left,2
+20250922193832,2025-09-22T20:06:01,16,Medium Rough Chip - Short Pin,3-6,right,2
+20250922193832,2025-09-22T20:08:53,17,Medium Fairway Chip - Long Pin,9-12,short-left,2
+20250922193832,2025-09-22T20:11:27,18,Medium Rough Chip - Middle Pin,>15,short,3
