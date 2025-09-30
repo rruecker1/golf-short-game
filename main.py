@@ -1,30 +1,43 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
 from collections import Counter
 import os, csv, random
 from datetime import datetime
 import pandas as pd
+import dropbox
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-HISTORY_FILE = "round_history.csv"
+# Dropbox setup
+DROPBOX_TOKEN = os.environ.get("DROPBOX_TOKEN")
+DBX_PATH = "/round_history.csv"  # Path inside Dropbox
+dbx = dropbox.Dropbox(DROPBOX_TOKEN)
 
-# Ensure history file exists
-if not os.path.exists(HISTORY_FILE):
-    with open(HISTORY_FILE, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["Round", "Timestamp", "Shot", "Prompt", "Proximity", "Direction", "Strokes"])
-        writer.writeheader()
+# Ensure history file exists in Dropbox
+def ensure_history_file():
+    try:
+        dbx.files_get_metadata(DBX_PATH)
+    except dropbox.exceptions.ApiError:
+        # Create empty file with headers
+        header = "Round,Timestamp,Shot,Prompt,Proximity,Direction,Strokes\n"
+        dbx.files_upload(header.encode(), DBX_PATH, mode=dropbox.files.WriteMode.overwrite)
+
+ensure_history_file()
 
 def load_history():
-    if not os.path.exists(HISTORY_FILE):
+    """Download round_history.csv from Dropbox into DataFrame"""
+    try:
+        metadata, res = dbx.files_download(DBX_PATH)
+        data = res.content.decode()
+        return pd.read_csv(io.StringIO(data))
+    except Exception:
         return pd.DataFrame()
-    return pd.read_csv(HISTORY_FILE)
 
-from flask import send_file
-
-@app.route("/history")
-def history():
-    return send_file("round_history.csv", as_attachment=False)
+def save_history(df):
+    """Upload DataFrame back to Dropbox as CSV"""
+    out = io.StringIO()
+    df.to_csv(out, index=False)
+    dbx.files_upload(out.getvalue().encode(), DBX_PATH, mode=dropbox.files.WriteMode.overwrite)
 
 @app.route("/")
 def index():
@@ -134,7 +147,7 @@ def save_shot(n):
     df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
 
     # Save back to CSV (overwrite the file)
-    df.to_csv(HISTORY_FILE, index=False)
+    save_history(df)
 
     if n >= len(session["prompts"]):
         return redirect(url_for("stats"))
