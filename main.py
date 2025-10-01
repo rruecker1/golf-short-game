@@ -4,40 +4,16 @@ import os, csv, random, io
 from datetime import datetime
 import pandas as pd
 import dropbox
+from dropbox import DropboxOAuth2FlowNoRedirect, DropboxOAuth2Flow
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-# Dropbox setup
-DROPBOX_TOKEN = os.environ.get("DROPBOX_TOKEN")
+# Dropbox setup with refresh token
+APP_KEY = os.environ.get("DROPBOX_APP_KEY")
+APP_SECRET = os.environ.get("DROPBOX_APP_SECRET")
+REFRESH_TOKEN = os.environ.get("DROPBOX_REFRESH_TOKEN")
 DBX_PATH = "/round_history.csv"  # Path inside Dropbox
-dbx = dropbox.Dropbox(DROPBOX_TOKEN)
-
-# Ensure history file exists in Dropbox
-def ensure_history_file():
-    try:
-        dbx.files_get_metadata(DBX_PATH)
-    except dropbox.exceptions.ApiError:
-        # Create empty file with headers
-        header = "Round,Timestamp,Shot,Prompt,Proximity,Direction,Strokes\n"
-        dbx.files_upload(header.encode(), DBX_PATH, mode=dropbox.files.WriteMode.overwrite)
-
-ensure_history_file()
-
-def load_history():
-    """Download round_history.csv from Dropbox into DataFrame"""
-    try:
-        metadata, res = dbx.files_download(DBX_PATH)
-        data = res.content.decode()
-        return pd.read_csv(io.StringIO(data))
-    except Exception:
-        return pd.DataFrame()
-
-def save_history(df):
-    """Upload DataFrame back to Dropbox as CSV"""
-    out = io.StringIO()
-    df.to_csv(out, index=False)
-    dbx.files_upload(out.getvalue().encode(), DBX_PATH, mode=dropbox.files.WriteMode.overwrite)
 
 @app.route("/")
 def index():
