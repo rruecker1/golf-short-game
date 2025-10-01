@@ -166,7 +166,13 @@ def save_shot(n):
         return redirect(url_for("stats"))
     return redirect(url_for("shot", n=n + 1))
 
-
+@app.route("/exit_round")
+def exit_round():
+    session.pop("prompts", None)
+    session.pop("round_id", None)
+    flash("Round exited.")
+    return redirect(url_for("index"))
+    
 @app.route("/stats")
 def stats():
     df = load_history()
