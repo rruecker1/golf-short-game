@@ -5,16 +5,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        button {
-            border: none;
-            border-radius: 10px;
-            color: white;
-            cursor: pointer;
-            transition: background 0.3s;
-            min-width: 80px;
-            padding: 10px 5%;
-            font-size: 16px;
-        }
 
         .selected {
             background-color: #28a745 !important;
@@ -22,19 +12,20 @@
 
         .compass-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, auto);
             grid-template-rows: repeat(3, auto);
-            gap: 1px;
+            gap: 0px;
             justify-items: center;
             align-items: center;
             margin-bottom: 5px;
         }
 
         .compass-grid button {
-            width: 70%;
-            font-size: 1.5em;
-            height: 60px;
+            width: 60%;
             background-color: #007bff;
+            padding: 0;
+            font-size: 1.2em; 
+            height: 40px;
         }
 
         .compass-grid button:hover {
@@ -59,6 +50,8 @@
 
         .option-buttons button {
             background-color: #007bff;
+            font-size: 14px;
+            padding: 10px;
         }
 
         .option-buttons button:hover {
@@ -67,10 +60,10 @@
 
         .btn-save {
             background-color: #007bff;
-            font-size: 18px;
             padding: 12px 20px;
             border-radius: 10px;
             margin-top: 10px;
+            font-size: 14px
         }
 
         .btn-save:hover {
@@ -85,13 +78,22 @@
         }
 
         .shot-nav {
-            margin-top: 20px;
-            text-align: center;
+            display: flex;
+            flex-wrap: wrap;         /* allow wrapping to multiple rows */
+            justify-content: center; /* center rows */
+            max-width: 420px;        /* optional: controls row length */
+            margin: 0 auto;
+            gap: 4px;                /* spacing between buttons */
         }
+        
         .shot-link {
-            display: inline-block;
-            margin: 3px;
-            padding: 8px 12px;
+            display: flex;
+            align-items: center;   /* vertical centering */
+            justify-content: center; /* horizontal centering */
+            width: 14px;      /* same width for all buttons */
+            height: 12px;     /* same height for all buttons */
+            margin: 0px;
+            padding: 10px 10px;
             border-radius: 6px;
             text-decoration: none;
             background-color: #ccc;
@@ -106,11 +108,6 @@
             border: 2px solid #000; /* highlight current shot */
         }
 
-        @media (max-width: 400px) {
-            .compass-grid button { font-size: 1.2em; height: 40px; }
-            .option-buttons button { font-size: 14px; padding: 10px; }
-            .btn-save { font-size: 16px; padding: 10px 15px; }
-        }
     </style>
 </head>
 <body>
@@ -157,7 +154,7 @@
                         onclick="selectOption('proximity','{{ option }}',this)">{{ option }}</button>
                 {% endfor %}
             </div>
-
+            
             <!-- Strokes buttons -->
             <h3>📝 Strokes</h3>
             <div class="option-buttons">
@@ -167,10 +164,21 @@
                 {% endfor %}
             </div>
 
-            <button type="submit" class="btn-save">💾 Save Shot</button>
+            <!-- Save and Exit buttons -->
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;">
+                <!-- Save Shot button -->
+                <button type="submit" class="btn-save">💾 Save Shot</button>
 
+                <!-- Exit Round button with popup -->
+                <button type="button" class="btn-save" onclick="confirmExit()">❌ Exit Round</button>
+            </div>
+
+
+
+            <h4>Next Shot: {{ next_prompt }}</h4>
+            
+            <h4>Jump to Shot:</h4>
             <div class="shot-nav">
-                <h4>Jump to Shot:</h4>
                 {% for link in shot_links %}
                     <a href="{{ url_for('shot', n=link.n) }}" 
                        class="shot-link {% if link.saved %}saved{% endif %} {% if link.n == n %}current{% endif %}">
@@ -179,7 +187,7 @@
                 {% endfor %}
             </div>
 
-            <h4>Next Shot: {{ next_prompt }}</h4>
+            
         </form>
     </div>
 
@@ -189,6 +197,11 @@
             const group = btn.parentElement.querySelectorAll("button");
             group.forEach(b => b.classList.remove("selected"));
             btn.classList.add("selected");
+        }
+        function confirmExit() {
+            if (confirm("Are you sure you want to exit this round? Unsaved data will be lost.")) {
+                window.location.href = "{{ url_for('exit_round') }}";
+            }
         }
     </script>
 </body>
