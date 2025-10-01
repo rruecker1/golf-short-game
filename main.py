@@ -15,6 +15,43 @@ APP_SECRET = os.environ.get("DROPBOX_APP_SECRET")
 REFRESH_TOKEN = os.environ.get("DROPBOX_REFRESH_TOKEN")
 DBX_PATH = "/round_history.csv"  # Path inside Dropbox
 
+if not all([APP_KEY, APP_SECRET, REFRESH_TOKEN]):
+    raise ValueError("Missing Dropbox credentials. Check Render environment variables.")
+
+dbx = dropbox.Dropbox(
+    oauth2_refresh_token=REFRESH_TOKEN,
+    app_key=APP_KEY,
+    app_secret=APP_SECRET
+)
+
+DBX_PATH = "/round_history.csv"  # Path inside Dropbox
+
+# Ensure history file exists in Dropbox
+def ensure_history_file():
+    try:
+        dbx.files_get_metadata(DBX_PATH)
+    except dropbox.exceptions.ApiError:
+        header = "Round,Timestamp,Shot,Prompt,Proximity,Direction,Strokes\n"
+        dbx.files_upload(header.encode(), DBX_PATH, mode=dropbox.files.WriteMode.overwrite)
+
+ensure_history_file()
+
+def load_history():
+    """Download round_history.csv from Dropbox into DataFrame"""
+    try:
+        metadata, res = dbx.files_download(DBX_PATH)
+        data = res.content.decode()
+        return pd.read_csv(io.StringIO(data))
+    except Exception as e:
+        print(f"Error loading history: {e}")
+        return pd.DataFrame()
+
+def save_history(df):
+    """Upload DataFrame back to Dropbox as CSV"""
+    out = io.StringIO()
+    df.to_csv(out, index=False)
+    dbx.files_upload(out.getvalue().encode(), DBX_PATH, mode=dropbox.files.WriteMode.overwrite)
+
 @app.route("/")
 def index():
     return render_template("index.html")
